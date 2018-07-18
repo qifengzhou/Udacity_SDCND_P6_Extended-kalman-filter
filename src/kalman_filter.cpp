@@ -67,6 +67,22 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   VectorXd z_pred(3);
   z_pred << rho, phi, rho_dot;
   VectorXd y = z - z_pred;
+
+  // check and put phi in the range of (-pi, pi)
+  const double pi = 3.1415926;
+
+  bool good_phi = false;
+  while (good_phi == false) {
+      if (y(1) > pi) {
+          y(1) = y(1) - 2 * pi;
+      }
+      else if (y(1) < -pi) {
+          y(1) = y(1) + 2 * pi;
+      } else {
+          good_phi = true;
+      }
+  }
+
   MatrixXd Ht = H_.transpose();
   MatrixXd S = H_ * P_ * Ht + R_;
   MatrixXd Si = S.inverse();
